@@ -9,13 +9,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection = "products")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product {
-    private int id;
+    @Id
+    private String id;
 
     @NotBlank(message = "Tên sản phẩm không được để trống")
     private String name;
@@ -28,5 +33,6 @@ public class Product {
     @Max(value = 9999999, message = "Giá sản phẩm không được lớn hơn 9999999")
     private long price;
 
+    @DBRef
     private Category category;
 }

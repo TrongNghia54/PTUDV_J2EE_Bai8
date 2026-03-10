@@ -44,7 +44,7 @@ public class ProductController {
     @PostMapping("/create")
     public String Create(@Valid Product newProduct,
                          BindingResult result,
-                         @RequestParam("category.id") int categoryId,
+                         @RequestParam("category.id") String categoryId,
                          @RequestParam("imageProduct") MultipartFile imageProduct,
                          Model model) {
         if (result.hasErrors()) {
@@ -64,7 +64,7 @@ public class ProductController {
 
     // Xử lý xóa sản phẩm
     @GetMapping("/delete/{id}")
-    public String Delete(@PathVariable int id) {
+    public String Delete(@PathVariable String id) {
         productService.delete(id);
         return "redirect:/products";
     }
@@ -78,7 +78,7 @@ public class ProductController {
 
     // Hiển thị form chỉnh sửa sản phẩm
     @GetMapping("/edit/{id}")
-    public String Edit(@PathVariable int id, Model model) {
+    public String Edit(@PathVariable String id, Model model) {
         Product find = productService.get(id);
         if (find == null) {
             return "error/404"; // Trang lỗi nếu không tìm thấy ID

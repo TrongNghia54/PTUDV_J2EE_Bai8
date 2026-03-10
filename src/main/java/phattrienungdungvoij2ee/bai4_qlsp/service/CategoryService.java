@@ -1,25 +1,49 @@
 package phattrienungdungvoij2ee.bai4_qlsp.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import phattrienungdungvoij2ee.bai4_qlsp.model.Category;
-import java.util.ArrayList;
+import phattrienungdungvoij2ee.bai4_qlsp.repository.CategoryRepository;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CategoryService {
-    private List<Category> listCategory = new ArrayList<>();
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-    public CategoryService() {
-        // Dữ liệu mẫu giúp tránh lỗi Null khi chạy lần đầu
-        listCategory.add(new Category(1, "Điện thoại"));
-        listCategory.add(new Category(2, "Laptop"));
+    // Khởi tạo dữ liệu mẫu
+    @PostConstruct
+    public void initSampleData() {
+        if (categoryRepository.count() == 0) {
+            categoryRepository.save(new Category(UUID.randomUUID().toString(), "Điện thoại"));
+            categoryRepository.save(new Category(UUID.randomUUID().toString(), "Laptop"));
+        }
     }
 
     public List<Category> getAllCategories() {
-        return listCategory;
+        return categoryRepository.findAll();
     }
 
-    public Category get(int id) {
-        return listCategory.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
+    public Category get(String id) {
+        Optional<Category> category = categoryRepository.findById(id);
+        return category.orElse(null);
+    }
+
+    public Category getByName(String name) {
+        return categoryRepository.findByName(name);
+    }
+
+    public Category add(Category category) {
+        if (category.getId() == null || category.getId().isEmpty()) {
+            category.setId(UUID.randomUUID().toString());
+        }
+        return categoryRepository.save(category);
+    }
+
+    public void delete(String id) {
+        categoryRepository.deleteById(id);
     }
 }

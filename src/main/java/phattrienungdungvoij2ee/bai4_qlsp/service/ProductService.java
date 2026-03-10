@@ -1,34 +1,39 @@
 package phattrienungdungvoij2ee.bai4_qlsp.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import phattrienungdungvoij2ee.bai4_qlsp.model.Product;
+import phattrienungdungvoij2ee.bai4_qlsp.repository.ProductRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ProductService {
-    private List<Product> listProduct = new ArrayList<>();
+    @Autowired
+    private ProductRepository productRepository;
 
     public List<Product> getAll() {
-        return listProduct;
+        return productRepository.findAll();
     }
 
-    public Product get(int id) {
-        return listProduct.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+    public Product get(String id) {
+        Optional<Product> product = productRepository.findById(id);
+        return product.orElse(null);
     }
 
     public void add(Product newProduct) {
-        int maxId = listProduct.stream().mapToInt(Product::getId).max().orElse(0);
-        newProduct.setId(maxId + 1);
-        listProduct.add(newProduct);
+        if (newProduct.getId() == null || newProduct.getId().isEmpty()) {
+            newProduct.setId(UUID.randomUUID().toString());
+        }
+        productRepository.save(newProduct);
     }
 
     public void update(Product editProduct) {
@@ -36,33 +41,25 @@ public class ProductService {
         if (find != null) {
             find.setPrice(editProduct.getPrice());
             find.setName(editProduct.getName());
-            if (editProduct.getImage() != null) {
+            if (editProduct.getImage() != null && !editProduct.getImage().isEmpty()) {
                 find.setImage(editProduct.getImage());
             }
             find.setCategory(editProduct.getCategory());
+            productRepository.save(find);
         }
     }
 
-    public void delete(int id) {
-        listProduct.removeIf(p -> p.getId() == id);
+    public void delete(String id) {
+        productRepository.deleteById(id);
     }
 
     public List<Product> searchByName(String query) {
         if (query == null || query.isBlank()) {
             return getAll();
         }
-        String lower = query.toLowerCase();
-        List<Product> result = new ArrayList<>();
-        for (Product p : listProduct) {
-            if (p.getName() != null && p.getName().toLowerCase().contains(lower)) {
-                result.add(p);
-            }
-        }
-        return result;
+        return productRepository.findByNameContainingIgnoreCase(query);
     }
 
-
-    // Đảm bảo tên hàm là updateImage (chữ i viết hoa)
     public void updateImage(Product newProduct, MultipartFile imageProduct) {
         String contentType = imageProduct.getContentType();
         if (contentType != null && !contentType.startsWith("image/")) {
