@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{_layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="card-title mb-4">
+                            <span sec:authorize="!isAuthenticated()">Welcome to Product Management</span>
+                            <span sec:authorize="isAuthenticated()">Hello, <span th:text="${#authentication.name}"></span></span>
+                        </h1>
+                        
+                        <div sec:authorize="!isAuthenticated()">
+                            <p class="lead">Please log in to access the product management system.</p>
+                            <a th:href="@{/login}" class="btn btn-primary btn-lg">Sign In</a>
+                        </div>
+                        
+                        <div sec:authorize="isAuthenticated()">
+                            <p class="lead">You are logged in as <strong th:text="${#authentication.name}"></strong></p>
+                            <div class="mt-4">
+                                <a th:href="@{/products}" class="btn btn-info me-2">View Products</a>
+                                <a th:href="@{/logout}" class="btn btn-danger">Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
