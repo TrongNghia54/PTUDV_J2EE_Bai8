@@ -15,9 +15,14 @@
     <div class="container-fluid" style="padding-left: 40px;">
         <a class="navbar-brand" th:href="@{/home}">Home</a>
         <a class="navbar-brand" th:href="@{/products}">Products</a>
+        <a class="navbar-brand" th:href="@{/cart}">
+            Giỏ hàng
+            <span class="badge bg-danger" th:if="${session.cart != null and !session.cart.isEmpty()}"
+                  th:text="${session.cart.size()}"></span>
+        </a>
 
-        <form class="d-flex me-auto" role="search" th:action="@{/products/search}" th:method="get">
-            <input class="form-control me-2" type="search" name="q" placeholder="Search" aria-label="Search">
+        <form class="d-flex me-auto" role="search" th:action="@{/products}" th:method="get">
+            <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm theo tên..." aria-label="Search">
             <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
         

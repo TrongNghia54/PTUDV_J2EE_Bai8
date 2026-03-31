@@ -29,7 +29,9 @@
                             <p class="lead">You are logged in as <strong th:text="${#authentication.name}"></strong></p>
                             <div class="mt-4">
                                 <a th:href="@{/products}" class="btn btn-info me-2">View Products</a>
-                                <a th:href="@{/logout}" class="btn btn-danger">Sign Out</a>
+                                <form th:action="@{/logout}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Sign Out</button>
+                                </form>
                             </div>
                         </div>
                     </div>

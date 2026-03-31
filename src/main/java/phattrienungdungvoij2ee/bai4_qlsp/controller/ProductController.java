@@ -2,6 +2,7 @@ package phattrienungdungvoij2ee.bai4_qlsp.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,10 +23,27 @@ public class ProductController {
     @Autowired
     private CategoryService categoryService;
 
-    // Hiển thị danh sách sản phẩm
+    // Hiển thị danh sách sản phẩm với tìm kiếm, phân trang, sắp xếp, lọc
     @GetMapping()
-    public String Index(Model model) {
-        model.addAttribute("listproduct", productService.getAll());
+    public String Index(@RequestParam(defaultValue = "") String keyword,
+                        @RequestParam(defaultValue = "") String categoryId,
+                        @RequestParam(defaultValue = "") String sort,
+                        @RequestParam(defaultValue = "0") int page,
+                        Model model) {
+        Category category = null;
+        if (categoryId != null && !categoryId.isBlank()) {
+            category = categoryService.get(categoryId);
+        }
+
+        Page<Product> productPage = productService.searchProducts(keyword, category, sort, page, 5);
+
+        model.addAttribute("listproduct", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("sort", sort);
+        model.addAttribute("categories", categoryService.getAllCategories());
         return "product/products";
     }
 
@@ -67,13 +85,6 @@ public class ProductController {
     public String Delete(@PathVariable String id) {
         productService.delete(id);
         return "redirect:/products";
-    }
-
-    // Tìm kiếm theo tên
-    @GetMapping("/search")
-    public String Search(@RequestParam("q") String query, Model model) {
-        model.addAttribute("listproduct", productService.searchByName(query));
-        return "product/products";
     }
 
     // Hiển thị form chỉnh sửa sản phẩm

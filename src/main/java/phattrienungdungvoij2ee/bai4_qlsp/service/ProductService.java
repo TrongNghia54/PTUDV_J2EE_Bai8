@@ -1,8 +1,13 @@
 package phattrienungdungvoij2ee.bai4_qlsp.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import phattrienungdungvoij2ee.bai4_qlsp.model.Category;
 import phattrienungdungvoij2ee.bai4_qlsp.model.Product;
 import phattrienungdungvoij2ee.bai4_qlsp.repository.ProductRepository;
 
@@ -20,6 +25,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private SequenceGeneratorService sequenceGenerator;
+
     public List<Product> getAll() {
         return productRepository.findAll();
     }
@@ -31,7 +39,8 @@ public class ProductService {
 
     public void add(Product newProduct) {
         if (newProduct.getId() == null || newProduct.getId().isEmpty()) {
-            newProduct.setId(UUID.randomUUID().toString());
+            long seqId = sequenceGenerator.generateSequence("products_sequence");
+            newProduct.setId(String.valueOf(seqId));
         }
         productRepository.save(newProduct);
     }
@@ -58,6 +67,28 @@ public class ProductService {
             return getAll();
         }
         return productRepository.findByNameContainingIgnoreCase(query);
+    }
+
+    public Page<Product> searchProducts(String keyword, Category category, String sort, int page, int size) {
+        Sort sortObj = Sort.unsorted();
+        if ("price_asc".equals(sort)) {
+            sortObj = Sort.by(Sort.Direction.ASC, "price");
+        } else if ("price_desc".equals(sort)) {
+            sortObj = Sort.by(Sort.Direction.DESC, "price");
+        }
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), size, sortObj);
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasCategory = category != null;
+
+        if (hasKeyword && hasCategory) {
+            return productRepository.findByNameContainingIgnoreCaseAndCategory(keyword, category, pageable);
+        } else if (hasKeyword) {
+            return productRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        } else if (hasCategory) {
+            return productRepository.findByCategory(category, pageable);
+        }
+        return productRepository.findAll(pageable);
     }
 
     public void updateImage(Product newProduct, MultipartFile imageProduct) {
